@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filme Aleatório</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f4f4;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        h1 {
+            color: #333;
+            font-size: 2em;
+        }
+        body.dark-mode h1 {
+            color: #e0e0e0;
+        }
+        .movie-filters {
+            margin-bottom: 20px;
+        }
+        .movie-filters select, .movie-filters input {
+            padding: 10px;
+            font-size: 16px;
+            margin: 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            max-width: 200px;
+            width: 100%;
+        }
+        body.dark-mode .movie-filters select, body.dark-mode .movie-filters input {
+            background-color: #333;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        .keyword-container {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .keyword {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 5px;
+            display: flex;
+            align-items: center;
+        }
+        body.dark-mode .keyword {
+            background-color: #444;
+        }
+        .keyword button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        body.dark-mode .keyword button {
+            color: #e0e0e0;
+        }
+        #generate-button, #add-keyword-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            max-width: 200px;
+            width: 100%;
+        }
+        body.dark-mode #generate-button, body.dark-mode #add-keyword-button {
+            background-color: #555;
+        }
+        #generate-button:hover, #add-keyword-button:hover {
+            background-color: #0056b3;
+        }
+        body.dark-mode #generate-button:hover, body.dark-mode #add-keyword-button:hover {
+            background-color: #333;
+        }
+        #movie-info {
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        body.dark-mode #movie-info {
+            background-color: #1e1e1e;
+        }
+        img {
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        #movie-info img {
+            max-width: 200px;
+            height: auto;
+            margin: 10px auto;
+        }
+        #movie-history {
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        body.dark-mode #movie-history {
+            background-color: #1e1e1e;
+        }
+        #movie-history.hidden {
+            display: none;
+        }
+        #movie-history .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            overflow: hidden;
+        }
+        #movie-history .movie-entry {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        body.dark-mode #movie-history .movie-entry {
+            border-color: #444;
+        }
+        #movie-history .movie-entry img {
+            width: 100%;
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        #movie-history-toggle {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        body.dark-mode #movie-history-toggle {
+            background-color: #444;
+        }
+        #movie-history-toggle:hover {
+            background-color: #0056b3;
+        }
+        body.dark-mode #movie-history-toggle:hover {
+            background-color: #333;
+        }
+        .synopsis {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .synopsis.expanded {
+            max-height: 500px;
+        }
+        .toggle-synopsis {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        body.dark-mode .toggle-synopsis {
+            background-color: #444;
+        }
+        .toggle-synopsis:hover {
+            background-color: #0056b3;
+        }
+        body.dark-mode .toggle-synopsis:hover {
+            background-color: #333;
+        }
+        @media (max-width: 600px) {
+            .movie-filters {
+                flex-direction: column;
+            }
+            .movie-filters select {
+                margin-bottom: 10px;
+            }
+            #generate-button {
+                width: 100%;
+            }
+        }
+        #pagination-controls {
+            margin-top: 20px;
+        }
+        .pagination-button {
+            padding: 5px 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 0 5px;
+        }
+        body.dark-mode .pagination-button {
+            background-color: #444;
+        }
+        .pagination-button:hover {
+            background-color: #0056b3;
+        }
+        body.dark-mode .pagination-button:hover {
+            background-color: #333;
+        }
+        .pagination-button.disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        body.dark-mode .dark-mode-toggle {
+            background-color: #444;
+        }
+        .dark-mode-toggle:hover {
+            background-color: #0056b3;
+        }
+        body.dark-mode .dark-mode-toggle:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle">Modo Escuro</button>
+    <h1>Filmes</h1>
+    <div class="movie-filters">
+        <select id="genre-filter">
+            <option value="">Todos os Gêneros</option>
+            
+        </select>
+        <input type="text" id="keyword-input" placeholder="Palavra-Chave">
+        <button id="add-keyword-button">Adicionar</button>
+    </div>
+    <div class="keyword-container" id="keyword-container"></div>
+    <button id="generate-button">Gerar Filme</button>
+    <div id="movie-info"></div>
+    <button id="movie-history-toggle">Mostrar Histórico</button>
+    <div id="movie-history" class="hidden">
+        <h2>Histórico de Filmes</h2>
+        <div class="movie-grid"></div>
+        <div id="pagination-controls">
+            <button class="pagination-button" id="prev-page">Página Anterior</button>
+            <button class="pagination-button" id="next-page">Próxima Página</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
